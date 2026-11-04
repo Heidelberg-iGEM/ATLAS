@@ -1,0 +1,31 @@
+# RFdiffusion3 input — WORKED EXAMPLE, N-terminal latch on a single 33 aa repeat.
+#
+# Real config used for the Serratia GvpC Repeat3 run (2026-09-15). Smaller and
+# cheaper than example_full_latch.yaml -- the better template to start from.
+# See example_full_latch.yaml for the full field-by-field explanation.
+#
+# Note the residue numbering: Repeat3.pdb keeps the FULL protein's numbering
+# (A92-124) even though the file holds only the isolated repeat. Whatever
+# numbering your motif PDB uses is what the contig, select_fixed_atoms and
+# select_hotspots ranges must match -- and the hotspots must lie inside the
+# fixed range.
+#
+# The matching step-2 call for this config was:
+#   --fixed-start-sequence "VTDMSKKTLALLDG"   (start of the fixed A92-124 sequence)
+# i.e. an N-terminal latch. In the pipeline: --redesign_terminus n.
+
+autoinhibited_binder:
+  input: /home/hd/hd_hd/hd_ps334/workspace/foundry/input_pdbs/Repeat3.pdb
+
+  contig: 16-24,A92-124
+
+  select_fixed_atoms:
+    A92-124: ALL
+
+  select_hotspots:
+    A110: CB,CG
+    A116: CB,CG
+
+  infer_ori_strategy: hotspots
+
+  is_non_loopy: true

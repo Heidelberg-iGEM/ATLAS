@@ -1,0 +1,258 @@
+# =============================================================================
+# GvpC evolution - configuration
+#
+# This is the configuration of the team's L1 round for Serratia GvpC (recovered
+# from the cluster, comments translated), with the paths made generic.
+# Keys marked "ADDED" were not in the original file: run_pipeline.sh of this
+# repository reads them, the original driver passed the same values on the
+# command line (the values are the script defaults of the original run).
+#
+# install.sh copies this file to work/evolution/00_pipeline/config.yaml and fills
+# in the paths. Only the "envs:" paths are absolute; everything else is resolved
+# relative to project.root.
+# =============================================================================
+
+project:
+  root: ~/evolution_project        # the folder given to setup_envs.sh
+  loop: L1                         # one folder per round under 04_loops/
+
+# The template. The FILE NAME does not matter - what matters is that the file passes
+# `python lib_checks.py <file>`: label == auth in both columns AND a filled
+# _entity_poly_seq block (05_template_fix.py repairs a repacked template). Two
+# templates in one pipeline are the double-track problem from handover §6.1.
+# The files below ship with this repository (inputs/), install.sh links them.
+template:
+  cif: 02_input/templates/SerGvpCR3_4GvpA_trimmed_repacked.cif
+  pdb: 02_input/templates/SerGvpCR3_4GvpA_trimmed_repacked.pdb
+  binder_chain: F
+  target_chains: [A, B, C, D]
+  binder_range: [92, 124]
+  target_range: [1, 69]
+  native_binder: VTDMSKKTLALLDGFNAERKSMAERCAKERADF
+
+epitope:
+  site: [53, 64]
+  pocket_contacts:
+    [[A,57],[A,60],[B,57],[B,60],[B,61],[B,64],
+     [C,53],[C,56],[C,57],[C,60],[C,61],[C,64],
+     [D,53],[D,56],[D,57],[D,60],[D,64]]
+  af2_hotspots: [A53,A56,A57,A60,B53,B56,B57,B60,
+                 C53,C56,C57,C60,D53,D56,D57,D60]
+  # Distance within which a BINDER residue counts as near the epitope. Measured on
+  # the real template (24.09.): at 10 A it is 32 of 33 residues - then
+  # af_hotspot_rmsd is just an expensive placement_rmsd and is no use as a
+  # second gate criterion. Set it smaller and read the number off in the run.
+  hotspot_cutoff: 6.0
+
+zones:
+  interface: [92,95,96,102,103,106,107,110,113,124]
+  exposed:   [93,94,97,98,100,101,104,105,108,109,
+              111,112,115,116,118,119,120,121,122,123]
+  middle:    [99,114,117]
+  # anchors: [4,11,12,15,19,22]   # optional: native anchor positions, only affects a diagnostic column
+  tiers:
+    T1: [95,110,113]
+    T2: [95,110,113,102,103,106]
+    T3: [95,110,113,102,103,106,92,96,107,124]
+
+prefilter:
+  max_ala_exposed:     0.35
+  max_bighyd_exposed:  3
+  max_ala_block:       3
+  min_charged_total:   0.30
+  min_bighyd_iface:    0
+
+# ---------------------------------------------------------------------------
+# CORRECTED 23.09.: this block used to be DEAD.
+# 11_mpnn_helicity.py reads `helicity.choice` and `helicity.neutral_ala` -
+# `palette`, `levels`, `target_net_charge` and `target_charged_frac` were never
+# read by any script. Anyone who turned those turned nothing; what always ran was
+# DEFAULT_CHOICE / DEFAULT_NEUTRAL_ALA from the script. The values below are
+# exactly those defaults, so the correction does NOT change the result - it only
+# makes the knob reachable again.
+# Cross-check: `python 11_mpnn_helicity.py --config config.yaml --show`
+# must still print 7.10 exposed of 12.39 total.
+# ---------------------------------------------------------------------------
+helicity:
+  levels: high,native,low          # ADDED: used by run_pipeline.sh (stage 2)
+  choice:
+    # pos/neg/neutral = the three CHARGE CLASSES of the native residue. The rule
+    # preserves the charge class: where the WT is positive, something positive
+    # is also there after the substitution. Only this way does the axis vary the
+    # propensity and not the electrostatics at the same time.
+    # Block notation, NO inline mappings: without PyYAML lib_registry falls back
+    # to a mini parser that does not know {a: b} and would silently pass the
+    # value through as a string - the same class of error that once made this
+    # block dead.
+    high:
+      pos: R
+      neg: E
+      neutral: Q
+    low:
+      pos: K
+      neg: D
+      neutral: T
+  # Fraction of the NEUTRAL exposed positions that get an alanine instead of the
+  # class choice. Ala is charge-neutral: net charge and charged fraction are
+  # preserved exactly. With 8 neutral positions, 0.5 means four alanines,
+  # i.e. the native fraction (WT: 4/20 outside).
+  neutral_ala:
+    high: 0.5
+    low:  0.0
+
+# ADDED: used by run_pipeline.sh (stage 3). Script defaults of 12_controls.py.
+controls:
+  n_scrambles: 5
+  seed: 2026
+  normal_helix: true
+  n_order_scrambles: 0
+  extra:
+
+gate:
+  max_shape_rmsd:  2.0
+  min_site_frac:   0.70
+  min_iface_plddt: 60
+  # DO NOT FREEZE before the big AF2 run is in.
+  # The trial run shows: the WT is at 11.42 and therefore fails its own filter at
+  # the previous threshold 10.0. The DIRECTION is right, though - the WT is the
+  # minimum over all ten controls, which lie between 12.70 and 24.71. At 13 the WT
+  # passes and 8 of 9 controls fail; that would be a real discriminator.
+  # The number is only set once the 200 designs are next to it:
+  #   40_select_gate.py --open --allow-missing, look at the distribution, THEN
+  #   enter it and freeze it. Until then it is deliberately wide open.
+  # Note: at the 13.0 taken from the trial run, control_reverse slips through
+  # with 12.70 - a scramble in the gate. At 12.0 all nine fail, the WT has a
+  # margin of 0.58, and 136 designs remain for 23 places. 12.0 was chosen.
+  max_i_pae:       12.0
+  # Is in report_only, so it does not veto. Two measured reasons
+  # (control trial run 24.09., model 1):
+  #  1. The ORDER is wrong. The WT is at 2.88, four of nine controls are
+  #     better (1.65 / 1.69 / 1.80 / 2.72). Any threshold that lets the WT
+  #     through lets these four through too - a threshold shifts the level, not
+  #     the order. Same class of error as boltz_complex_plddt, which ranked
+  #     the WT below its own scrambles and was discarded for exactly that reason.
+  #  2. As a loose emergency brake it would be REDUNDANT. The only control that
+  #     fails at 10.0 (20.94) already fails at af_i_pae_m1
+  #     (24.71 > 13). Additional exclusions: zero.
+  # The threshold stays as a number so that the column has a yardstick,
+  # in case the lab data later say something different.
+  max_hotspot_rmsd: 10.0
+  # 'ABCD in EVERY seed' let 0 of 10 designs through on 22.09. (29/50 seeds
+  # hit ABCD). Hence relaxed. A SETTING, not a measurement - it directly determines
+  # the throughput numbers in plan §6 and belongs on the wiki with its reasoning.
+  min_chain_seeds: 4        # out of 5
+  require_all_chains: false
+
+  # NEW 23.09. - both criteria stay as a COLUMN but lose the veto:
+  #   bz_site_frac    filters nothing on the 20.09. set (all 50 seeds
+  #                   between 0.94 and 1.00). Not a discriminator.
+  #   bz_iface_plddt  control_normal_helix (60 % alanine) passed with 64.9.
+  #                   Tightening the threshold would be calibration on ONE
+  #                   point - and that point is a negative control.
+  # Consequence that belongs on the slide: afterwards only
+  # bz_shape_rmsd plus the 4-chain criterion really veto. The selection work does not
+  # happen at the gate but at the ranking, the distance filter and the pot split.
+  # §06 item 08 EXPLICITLY names only bz_iface_plddt ("report instead of gate").
+  # bz_site_frac is counted as ineffective in item 09 but not proposed
+  # for removal - on the contrary, the original reason in the script is
+  # "emergency brake in case a binder misses the surface completely".
+  # An emergency brake that never triggers costs nothing. It is therefore back in as
+  # a veto. Whoever wants to remove it as well, adds it here.
+  # MEASURED in the control trial run 24.09. (10 controls, model 1):
+  #   af_hotspot_rmsd_m1  FOUR of nine controls are BETTER than the WT
+  #                       (1.65 / 1.69 / 1.80 / 2.72 against WT 2.88). This is
+  #                       the same class of error as boltz_complex_plddt, which
+  #                       ranked the WT below its own scrambles -
+  #                       and was discarded for exactly that reason.
+  #                       It is still good as an emergency brake against the
+  #                       catastrophic case (one control at 20.94), but not as a
+  #                       discriminator.
+  report_only: [bz_iface_plddt, af_hotspot_rmsd_m1]
+
+  # Hard abort if a criteria column is missing. 'Criteria active: 4/6' and then
+  # carrying on silently produces an order list that looks stricter than
+  # it is. As long as stage 9 (AF2ig) has not run, 40_select_gate.py therefore
+  # needs --allow-missing explicitly.
+  require_all_criteria: true
+
+# ---------------------------------------------------------------------------
+# The order frame. Read by 40_select_gate.py; every line can be overridden on
+# the command line.
+#
+# CHANGED 24.09.: frame from 28 to 60 places (order commitment).
+# The old place calculator (5 controls | 10 best | 13 diverse) assumed
+# 28-30 places.
+# ---------------------------------------------------------------------------
+select:
+  n_total:    60      # was 28
+  n_controls: 10      # was 5 - 2 real (WT, control_normal_helix) + 8 failures
+  n_best:     20      # was 10. NOT proportional 23: the top 30 by bsa are
+                      # 21x T3, the pot saturates. The 3 places are worth more
+                      # in the diverse pot.
+  n_diverse:  30      # was 13
+  n_medium:    6      # was 2. With 30 diverse places and bsa 739-1142, 2 was
+                      # symbolic.
+  n_fail:      8      # was 3
+  fail_mode:  borderline   # was spread. At the weak end 21 rows fail
+                      # ONLY at i_pae, with clean geometry and 5/5 chains.
+
+  # NEW 24.09. Measured: af_i_pae_m1 is confounded with the tier axis
+  # (rho +0.38 against identity_to_wt; T1 median 14.24 against T3 median 9.60,
+  # L1-0077 misses by 0.05). Behind the gate there are 0 orderable T1 and
+  # 0 T0 - the binding axis of the factorial design has collapsed to T2/T3.
+  # Without this priority the failure block draws from the i_pae group
+  # (74 rows, mostly T3) and the weak end does not make it onto the
+  # list. The block checks min_dist but ignores helicity_levels -
+  # intended, otherwise the 'native' candidates would drop out there.
+  fail_tiers: [tier_T0, tier_T1]
+  n_fail_tiers: 6
+
+  min_dist:    2      # unchanged. With k>=1 there would be 87 instead of 61 places,
+                      # but those differ in exactly one position -
+                      # "remove near-duplicates" was one of the hard requirements.
+  helicity_levels: [high, low]   # unchanged. With 'native' the ceiling would rise
+                      # to 84 places; not used because the
+                      # stability axis is a PAIRED high/low comparison
+                      # and 'native' pairs nothing. Can be re-evaluated (§7).
+  per_cell:    1      # unchanged
+  cluster_id:  0.70   # unchanged, diagnostic - does NOT replace min_dist
+
+boltz:
+  # DECIDED 22.09., FROZEN from now on: GvpC (chain F) without MSA, because a
+  # designed sequence has no real one; GvpA A-D get server MSAs.
+  msa_policy: empty_binder_only
+  diffusion_samples: 5
+  use_potentials: true
+  target_msa: 02_input/gvpa_target.csv
+  # 30_boltz_yaml.py enters this path for the target chains. Without it
+  # Boltz searches anew via an external server for each prediction - that makes the
+  # loops incomparable with one another. Leave empty as long as the .a3m is
+  # not backed up.
+
+mpnn:
+  tiers: T1,T2,T3             # ADDED: used by run_pipeline.sh (stage 1)
+  n_per_cell: 45              # ADDED: script default
+  seed0: 1000                 # ADDED: script default
+  model: ligand_mpnn          # ADDED: script default
+  # The production run L1 used 0.2, NOT the MPNN default 0.1. The measured
+  # saturation (45 runs at 3 positions -> 8 sequences) is therefore
+  # not an argmax artefact. For the temperature test: 10_mpnn_design.py --temp-scan
+  temperature: 0.2
+
+envs:
+  mpnn_py:   ~/evolution_project/tools/foundry/.venv/bin/python
+  boltz_py:  ~/miniforge3/envs/evolution_boltz/bin/python
+  boltz_bin: ~/miniforge3/envs/evolution_boltz/bin/boltz
+  af2_py:    ~/miniforge3/envs/BindCraft/bin/python
+  ros_py:    ~/miniforge3/envs/evolution_rosetta/bin/python
+  # CORRECTED 23.09.: this is the PARENT folder of params/, not params/
+  # itself. 21_af2_score.py passes the value on as data_dir to
+  # mk_afdesign_model(), and colabdesign appends '/params' itself.
+  # With the old value .../colabfold/params it searches .../params/params/ -
+  # and that is only noticed after the GPU waiting time.
+  # Cross-check before the run:  ls $af2_params/params/ | head
+  af2_params: ~/evolution_project/tools/BindCraft
+
+rosetta:
+  rows: order                 # ADDED: pass | selected | order | all
+  jobs: 16

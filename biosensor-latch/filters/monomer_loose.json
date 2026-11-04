@@ -1,0 +1,10 @@
+{
+  "min_pLDDT": 0.65,
+  "min_pTM": 0.35,
+  "max_Blocking_RMSD": 4.5,
+  "max_Binder_RMSD": 2.5,
+  "min_InterfaceOverlap_input_to_predicted": 0.15,
+  "min_Predicted_HotspotContactCount": 1,
+  "min_Input_HotspotContactCount": 1,
+  "max_GFPSegment_Binder_CAClashes": 2
+}

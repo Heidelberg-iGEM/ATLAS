@@ -1,0 +1,112 @@
+# =============================================================================
+# GVSAM - configuration
+#
+# Everything is set here. run_pipeline.sh reads this file and passes the values
+# to the stages. If a value is in this file, some script reads it.
+# =============================================================================
+
+project:
+  root: /path/to/project
+  run: ft1            # name of this training run; each run gets its own folder
+
+
+# --- Data --------------------------------------------------------------------
+# Raw images and hand-drawn instance masks, one mask per image. A mask has
+# background 0 and one positive integer id per annotated cluster, which is what
+# napari's Labels layer writes.
+#
+# negatives: a text file listing image stems whose EMPTY mask means "checked,
+# no gas vesicles" rather than "not annotated yet". One stem per line, '#' for
+# comments. Empty masks not listed there are dropped.
+data:
+  image_dir: 01_raw
+  mask_dir:  02_masks_gv
+  image_ext: .tif
+  mask_suffix: _mask
+  negatives: 02_masks_gv/negatives.txt
+
+
+# --- Split and augmentation ---------------------------------------------------
+# The split happens at image level and BEFORE augmentation, otherwise a rotated
+# copy of a training image can land in validation.
+# Only the training split is augmented. Multiples of 90 degrees are lossless and
+# leave the instance ids untouched; other angles crop corners and pad edges.
+split:
+  val_frac:  0.2
+  test_frac: 0.1
+  seed: 42
+
+augment:
+  angles: [90, 270]
+  flips: []           # horizontal, vertical, or both
+  # Augmented files carry "_aug" in their uid. The training script draws them
+  # less often through a weighted sampler, with this weight against 1.0 for an
+  # original image.
+  sampler_weight: 0.3
+
+
+# --- CellFinder fine-tuning ---------------------------------------------------
+# CellFinder is the detector half of CellSAM (an Anchor-DETR on top of SAM's
+# image encoder). It is the only part we train, since bounding boxes are enough
+# to count gas vesicle clusters.
+cellfinder:
+  epochs: 50
+  batch_size: 3
+  lr: 1.0e-4
+  lr_backbone: 1.0e-5
+  weight_decay: 1.0e-4
+  freeze_backbone_epochs: 0   # train the SAM backbone from the first epoch
+  num_workers: 8
+
+
+# --- Evaluation ---------------------------------------------------------------
+# score_thr: a predicted box is kept above this confidence. Lower finds more
+# clusters and produces more false positives.
+#
+# match: how a prediction is counted as a hit.
+#   center  the centre of the annotated box lies inside the predicted box
+#           (within center_tol px) and the two areas differ by at most
+#           area_ratio. For clusters this small, a one-pixel shift already
+#           lowers IoU a lot, which is why this is the default.
+#   iou     classical intersection over union against iou_thr.
+#
+# border_margin: predictions touching the image border are dropped, since a
+# cluster cut off by the frame cannot be annotated reliably.
+eval:
+  score_thr: 0.2
+  match: center
+  center_tol: 2
+  area_ratio: 4.0
+  iou_thr: 0.3
+  border_margin: 1
+
+
+# --- Mask decoder (optional) --------------------------------------------------
+# SAM's decoder turns each box into a pixel mask. We did not train it, because
+# boxes were enough for our read-out. Set enabled: true to run stages 5 and 6.
+decoder:
+  enabled: false
+  epochs: 50
+  batch_size: 2
+  lr_decoder: 1.0e-5
+  lr_neck: 5.0e-6
+  weight_decay: 1.0e-4
+  max_instances_per_image: 200
+  bbox_threshold: 0.4
+  inst_iou_thr: 0.5
+
+
+# --- Visualisation -------------------------------------------------------------
+# The last stage executes visualize.ipynb on the test split and writes an HTML
+# gallery: raw image, annotation, prediction, side by side.
+visualize:
+  notebook: visualize.ipynb
+  n_images: 10
+
+
+# --- Model weights and interpreter ---------------------------------------------
+models:
+  cellsam_ckpt: ~/.deepcell/models/cellsam_v1.2/cellsam_general.pt
+
+env:
+  python: ~/.conda/envs/gvsam/bin/python

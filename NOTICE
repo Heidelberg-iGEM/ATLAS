@@ -1,0 +1,57 @@
+Third-party software and attribution
+====================================
+
+The code in this repository is licensed under the MIT License (see LICENSE),
+except where noted below. Third-party tools are NOT redistributed here:
+install.sh downloads them from their own sources under their own licences.
+
+Code derived from third-party work
+----------------------------------
+
+gvpa-binder-design/scripts/rosetta_metrics.py reproduces the metrics,
+mover settings and XML filter strings of `score_interface` from BindCraft
+(functions/pyrosetta_utils.py), generalised to several target chains.
+BindCraft is licensed as follows:
+
+    MIT License
+
+    Copyright (c) 2024 Martin Pacesa
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+Tools that the pipelines call or import (fetched at install time, not included)
+-------------------------------------------------------------------------------
+
+  RosettaCommons foundry (rc-foundry): RFdiffusion3, ProteinMPNN/LigandMPNN
+      BSD 3-Clause, Institute for Protein Design, University of Washington
+      https://github.com/RosettaCommons/foundry
+  LigandMPNN (model weights)            MIT, https://github.com/dauparas/LigandMPNN
+  BindCraft (ColabDesign, AF2 parameters, DAlphaBall)
+                                        MIT, https://github.com/martinpacesa/BindCraft
+  CellSAM                               Apache-2.0, https://github.com/vanvalenlab/cellSAM
+  FlexCraft (Michael Jendrusch)         https://github.com/mjendrusch/flexcraft
+      The repository carries no licence file. It is cloned by install.sh and is
+      not redistributed here. Using it requires the author's permission.
+  Boltz-2                               see https://github.com/jwohlwend/boltz
+  PyRosetta                             requires its own licence (free for academic use),
+                                        https://www.pyrosetta.org/downloads
+  AlphaFold2 parameters                 see https://github.com/google-deepmind/alphafold
+
+Licences of the weights and of Boltz-2 and AlphaFold2 were not checked when this
+file was written; verify them before redistributing anything.

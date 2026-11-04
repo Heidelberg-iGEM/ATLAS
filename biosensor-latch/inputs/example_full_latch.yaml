@@ -1,0 +1,52 @@
+# RFdiffusion3 input — WORKED EXAMPLE, N-terminal latch on a full 164 aa motif.
+#
+# This is the real config used for the Serratia GvpC full-repeat run (2026-09-15).
+# Keep it as a reference for the file format; change at least `input:` and the
+# residue ranges for your own target.
+#
+# Passed to the pipeline as:  --rfd3_yaml input_jsons/<your_dir>/example_full_latch.yaml
+# (path resolved relative to --foundry_dir)
+#
+# Field notes:
+#   autoinhibited_binder  design name; becomes part of the output filenames.
+#   input                 ABSOLUTE path to the PDB holding your fixed motif.
+#   contig                "<generated-length-range>,<fixed-chain-range>".
+#                         Order matters: generated segment FIRST = latch at the
+#                         N-terminus  ->  run the pipeline with
+#                         --redesign_terminus n --fixed_start_sequence "<motif start>"
+#                         Flip to "A1-164,48-128" for a C-terminal latch
+#                         (--redesign_terminus c --fixed_end_sequence "<motif end>").
+#                         I inferred the flip from the contig convention rather than
+#                         from a logged c-terminal run -- bitte gegenchecken.
+#   select_fixed_atoms    ALL = hold the whole motif rigid (sequence AND coordinates).
+#   select_hotspots       surface residues the generated latch should cover. These
+#                         drive the design: ~2 per repeat worked here (7 total across
+#                         4 repeats). CB,CG = the side-chain atoms used as the restraint.
+#   infer_ori_strategy    hotspots = derive the generated segment's orientation from
+#                         the hotspots (no known bound geometry needed).
+#   is_non_loopy          true = bias toward structured (helical) rather than loopy
+#                         backbones.
+#
+# Latch length scales with motif size: 48-128 residues here for a 164 aa motif with
+# 7 spread-out hotspots, vs. 16-24 for the single-repeat example.
+
+autoinhibited_binder:
+  input: /home/hd/hd_hd/hd_ps334/workspace/foundry/input_pdbs/Ser_GvpC_full.pdb
+
+  contig: 48-128,A1-164
+
+  select_fixed_atoms:
+    A1-164: ALL
+
+  select_hotspots:
+    A44: CB,CG
+    A50: CB,CG
+    A77: CB,CG
+    A84: CB,CG
+    A110: CB,CG
+    A116: CB,CG
+    A143: CB,CG
+
+  infer_ori_strategy: hotspots
+
+  is_non_loopy: true

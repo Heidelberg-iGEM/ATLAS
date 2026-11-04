@@ -1,0 +1,13 @@
+# created by install.sh
+third_party/
+work/
+drylab.env
+
+__pycache__/
+*.pyc
+.DS_Store
+.ipynb_checkpoints/
+
+# runtime output of the GvpA package
+gvpa-binder-design/runs/
+gvpa-binder-design/logs/

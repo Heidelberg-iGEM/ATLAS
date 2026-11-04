@@ -1,0 +1,24 @@
+# Pinned versions of the third-party code that the pipelines need.
+# install.sh fetches exactly these; nothing from these projects is copied into
+# this repository (size, and FlexCraft has no licence file that allows it).
+#
+# Pins were taken on 2026-11-04. The versions the team originally ran with were
+# not recorded: if a pipeline breaks on an API change, adjust the pin here.
+
+# RosettaCommons foundry (RFdiffusion3 + ProteinMPNN/LigandMPNN), PyPI package rc-foundry
+FOUNDRY_VERSION=0.2.0
+
+# BindCraft (AlphaFold2 via ColabDesign, PyRosetta scoring, DAlphaBall.gcc)
+BINDCRAFT_REPO=https://github.com/martinpacesa/BindCraft
+BINDCRAFT_REF=7713aa0d0d351e4117a8befeb8541f3a8ebd3368
+
+# FlexCraft (Michael Jendrusch): AlphaFold2/JAX utilities used by the biosensor latch pipeline
+FLEXCRAFT_REPO=https://github.com/mjendrusch/flexcraft.git
+FLEXCRAFT_REF=4c45526a153c1c067a3e20a279f199c97bb20e18
+
+# CellSAM (GVSAM is a fine-tuned CellSAM)
+CELLSAM_REPO=https://github.com/vanvalenlab/cellSAM.git
+CELLSAM_REF=362a8e521bcd7313d5cb280bcd4cfc12977c1e9f
+
+# Defaults for the conda environments
+CUDA_VERSION=12.4

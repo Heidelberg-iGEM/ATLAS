@@ -1,0 +1,6 @@
+{
+  "min_pLDDT": 0.70,
+  "max_Partner1_HotspotContactCount": 0,
+  "max_Partner1_InterfaceOverlap": 0.20,
+  "min_Partner1_PositionalDisplacement": 3.0
+}
