@@ -72,7 +72,7 @@ Example (Repeat3-4, latch C-terminal)
 --------------------------------------
 
 python -u -m flexcraft.pipelines.dual_binder_pipeline.scripts.run_cage_pipeline \
-    --foundry_dir /home/hd/hd_hd/hd_ps334/workspace/foundry \
+    --foundry_dir /path/to/foundry \
     --rfd3_executable /path/to/foundry_env/bin/rfd3 \
     --foundry_python /path/to/foundry_env/bin/python \
     --rfd3_yaml input_jsons/gvpc_cage_latch/gvpc_repeat3-4_latch.yaml \
@@ -418,7 +418,7 @@ def build_bridge_csv(args, batch_index: int, foundry_dir: Path, summary_csv: Pat
                 print(
                     f"    WARNING: redesign_summary.csv says redesign_terminus={csv_terminus or '(missing)'} but "
                     f"--redesign_terminus={args.redesign_terminus}. Likely an old batch_partial_mpnn.py without the "
-                    "2026-09-16 patch on the cluster; using the CLI value + anchor sequence for the boundary."
+                    "2026-09-16 patch; using the CLI value + anchor sequence for the boundary."
                 )
                 stale_terminus_warned = True
             source = Path(row["structure_file"]).expanduser()

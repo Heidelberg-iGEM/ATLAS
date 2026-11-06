@@ -2,22 +2,22 @@
 #
 # One entry point for every part of the Drylab pipelines.
 #
-#   ./drylab.sh help
-#   ./drylab.sh doctor [PART]
-#   ./drylab.sh evolution calibrate | sharp [FROM] | resume N | selftest | py SCRIPT [ARGS]
-#   ./drylab.sh gvpa   COMMAND [ARGS]       (./drylab.sh gvpa help)
-#   ./drylab.sh latch  run [ARGS] | stage SCRIPT [ARGS] | check
-#   ./drylab.sh gvsam  run [FROM] | stage SCRIPT [ARGS]
-#   ./drylab.sh gas    notebook
+#   ./atlas.sh help
+#   ./atlas.sh doctor [PART]
+#   ./atlas.sh evolution calibrate | sharp [FROM] | resume N | selftest | py SCRIPT [ARGS]
+#   ./atlas.sh gvpa   COMMAND [ARGS]       (./atlas.sh gvpa help)
+#   ./atlas.sh latch  run [ARGS] | stage SCRIPT [ARGS] | check
+#   ./atlas.sh gvsam  run [FROM] | stage SCRIPT [ARGS]
+#   ./atlas.sh gas    notebook
 #
-# It reads drylab.env (written by install.sh) to find every interpreter, changes
+# It reads atlas.env (written by install.sh) to find every interpreter, changes
 # into the right folder and calls the scripts of this repository. It adds no logic
 # of its own: every command prints the line it runs.
 
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
-ENVFILE="$REPO/drylab.env"
+ENVFILE="$REPO/atlas.env"
 
 usage() { sed -n 2,14p "$0" | sed 's/^# \{0,1\}//'; }
 
@@ -29,7 +29,7 @@ if [ -f "$ENVFILE" ]; then
 fi
 
 die() { echo "error: $*" >&2; exit 1; }
-need_env() { [ -f "$ENVFILE" ] || die "drylab.env not found. Run ./install.sh first."; }
+need_env() { [ -f "$ENVFILE" ] || die "atlas.env not found. Run ./install.sh first."; }
 show() { echo "+ $*" >&2; "$@"; }
 
 # Read one interpreter path (key: value) from a config.yaml
@@ -142,7 +142,7 @@ import common
 cfg = common.load_config()
 print(Path(cfg["run_root"]) / cfg["campaign"])
 ')" || die "could not read the campaign config"
-    [ -f "$run/jobs.tsv" ] || die "$run/jobs.tsv not found; run './drylab.sh gvpa make-inputs' first"
+    [ -f "$run/jobs.tsv" ] || die "$run/jobs.tsv not found; run './atlas.sh gvpa make-inputs' first"
     local n=0 cell spec step gamma nb
     while IFS=$'\t' read -r cell spec step gamma nb; do
         [ "$cell" = "cell" ] && continue
@@ -194,7 +194,7 @@ latch commands:
                      ProteinMPNN checkpoint are filled in, everything else is passed on
   stage SCRIPT ARGS  one stage script, e.g. score_gfp_fusion_monomer
   check              GPU-free wiring check of the orchestrator
-The patched MPNN driver is linked into $FOUNDRY_WORKSPACE/scripts by install.sh. Flags: ./drylab.sh latch run --help and biosensor-latch/README.md.
+The patched MPNN driver is linked into $FOUNDRY_WORKSPACE/scripts by install.sh. Flags: ./atlas.sh latch run --help and biosensor-latch/README.md.
 EOF
             ;;
     esac

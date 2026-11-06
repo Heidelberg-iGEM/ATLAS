@@ -19,7 +19,7 @@
 #   - downloads model weights
 #   - creates a project folder per part under work/ with the repository's scripts
 #     linked in and a ready-to-edit config
-#   - writes drylab.env, which drylab.sh reads to find every interpreter
+#   - writes atlas.env, which atlas.sh reads to find every interpreter
 #
 # It is idempotent: whatever exists is skipped, so it can be rerun after a failure.
 # --dry-run prints every command without executing it.
@@ -75,7 +75,7 @@ else
 fi
 export PKG CUDA FOUNDRY_VERSION BINDCRAFT_REF CELLSAM_REF
 [ "$DRY" = 1 ] || mkdir -p "$TP" "$WORK"
-ENVFILE="$REPO/drylab.env"
+ENVFILE="$REPO/atlas.env"
 
 # --- helpers -----------------------------------------------------------------
 # clone <url> <dir> <ref>
@@ -161,7 +161,7 @@ if want latch; then
     # The example YAMLs name the motif PDB by absolute path; point them at this installation.
     for f in "$REPO"/biosensor-latch/inputs/*.yaml; do
         make_config "$f" "$TP/foundry/input_jsons/example/$(basename "$f")" \
-            -e "s|/home/hd/hd_hd/hd_ps334/workspace/foundry|$TP/foundry|g"
+            -e "s|/path/to/foundry/input_pdbs|$TP/foundry/input_pdbs|g"
     done
     # Patched ProteinMPNN driver (--redesign-terminus, --fixed-end-sequence) and the motif PDBs of the examples
     run ln -sfn "$REPO/biosensor-latch/foundry/batch_partial_mpnn.py" "$TP/foundry/scripts/batch_partial_mpnn.py"
@@ -189,11 +189,11 @@ if want gas; then
     fi
 fi
 
-# --- drylab.env ----------------------------------------------------------------
+# --- atlas.env ----------------------------------------------------------------
 say "Writing $ENVFILE"
 if [ "$DRY" = 0 ]; then
     cat > "$ENVFILE" <<EOF
-# Written by install.sh. Read by drylab.sh and gvpa-binder-design/env.sh.
+# Written by install.sh. Read by atlas.sh and gvpa-binder-design/env.sh.
 CONDA_BASE=$CONDA_BASE
 TP=$TP
 WORK=$WORK
@@ -224,7 +224,7 @@ fi
 cat <<EOF
 
 Done. Next steps:
-  ./drylab.sh doctor              check that everything the selected parts need is in place
-  ./drylab.sh help                list the commands of every part
+  ./atlas.sh doctor              check that everything the selected parts need is in place
+  ./atlas.sh help                list the commands of every part
   README.md                       tutorial for each part
 EOF

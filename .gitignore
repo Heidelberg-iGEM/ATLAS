@@ -1,7 +1,7 @@
 # created by install.sh
 third_party/
 work/
-drylab.env
+atlas.env
 
 __pycache__/
 *.pyc

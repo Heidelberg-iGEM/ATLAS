@@ -146,7 +146,6 @@ def main() -> int:
     for c in order:
         # registry.tier_of instead of c.split("_")[0]: the latter gives the word
         # 'tier' for 'tier_T1_high' and throws all three tiers into one bucket.
-        # That was the bug from todo_aktuell.md.
         t = registry.tier_of(c)
         tiers[t] = tiers.get(t, 0) + cells[c]["new"]
     print("  per tier (binding axis):  " +

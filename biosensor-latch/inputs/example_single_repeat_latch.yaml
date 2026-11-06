@@ -15,7 +15,7 @@
 # i.e. an N-terminal latch. In the pipeline: --redesign_terminus n.
 
 autoinhibited_binder:
-  input: /home/hd/hd_hd/hd_ps334/workspace/foundry/input_pdbs/Repeat3.pdb
+  input: /path/to/foundry/input_pdbs/Repeat3.pdb
 
   contig: 16-24,A92-124
 

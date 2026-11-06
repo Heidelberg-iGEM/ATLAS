@@ -74,7 +74,7 @@ print("base checkpoint ready")
 PY
 
 # --- 4  Annotation tool (optional, local machine) -----------------------------
-# napari is only needed where the masks are drawn, not on the cluster:
+# napari is only needed where the masks are drawn, not on a headless compute server:
 #   pip install "napari[all]"
 
 cat <<EOF

@@ -19,8 +19,7 @@ whole fused construct via AF2 from scratch -- every metric there
 (Blocking_RMSD, HotspotContactCount, PositionalDisplacement, ...) comes out
 of that fresh AF2 prediction, not from any pre-existing GFP structure. AF2's
 ability to co-fold this correctly is exactly what smoke tests so far have
-found unreliable/ambiguous (see Blocking-Peptide-Latch-Design.md,
-GvpC-Cage-Latch-Design.md).
+found unreliable/ambiguous.
 
 This script asks a different, purely geometric question instead, using a
 REAL, already-known GFP+GFP-binder complex structure (e.g. the same complex

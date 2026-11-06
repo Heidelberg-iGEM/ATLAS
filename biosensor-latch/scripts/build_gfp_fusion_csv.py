@@ -8,10 +8,8 @@ Place this file next to score_latch_monomer.py / score_latch_ternary.py, e.g.:
 
 Background
 ----------
-Blocking-Peptide-Latch-Design.md, "GFP-Binder-Integration" (2026-08-21) and
-"GFP binder fusion pipeline -- architecture" (internal design note, 2026-08-26): the GFP binder is
-attached directly (no linker) to the blocking peptide's free end. Whether
-the GFP binder's binding face ends up pointing toward the binder depends on
+The GFP binder is attached directly (no linker) to the blocking peptide's free end.
+Whether the GFP binder's binding face ends up pointing toward the binder depends on
 the helical register at the attachment point -- not on any 3D docking,
 since AF2 co-folds the whole construct from sequence alone (as already
 established for the GvpC ternary test in score_latch_ternary.py). So
@@ -26,8 +24,8 @@ convention score_latch_monomer.py has written since 2026-09-16, default
     - "n" (original architecture): the Test-1 chain runs blocking-peptide
       (free N-terminus) -> binder. The GFP binder attaches at the chain's
       N-terminus.
-    - "c" (added 2026-09-17, for C-terminal latches such as Repeat3-4 in
-      GvpC-Cage-Latch-Design): the Test-1 chain runs binder ->
+    - "c" (added 2026-09-17, for C-terminal latches such as Repeat3-4 of
+      GvpC): the Test-1 chain runs binder ->
       blocking-peptide (free C-terminus). The GFP binder attaches at the
       chain's C-terminus, directly after the blocking peptide.
 

@@ -9,8 +9,7 @@ Place this file next to score_latch_monomer.py / score_latch_ternary.py /
 build_gfp_fusion_csv.py / score_gfp_fusion_monomer.py, e.g.:
     flexcraft/pipelines/dual_binder_pipeline/scripts/score_gfp_fusion_partners.py
 
-Test 2/3/4 (see Blocking-Peptide-Latch-Design.md, "GFP-Binder-Integration")
-all run through this one script, distinguished only by which partner
+Test 2/3/4 all run through this one script, distinguished only by which partner
 arguments are supplied:
     Test 2: --partner1_* = GvpC, --partner1_target binder, no --partner2_*
             (GvpC should NOT bind)
@@ -49,8 +48,8 @@ segment vs. the binder segment depends on redesign_terminus, read per-row
 from the --gate_csv's own redesign_terminus column (written by
 score_gfp_fusion_monomer.py since 2026-09-17, default "n" for older CSVs
 without it): "n" (original) GFP segment leads, binder segment trails. "c"
-(added 2026-09-17, for C-terminal latches such as Repeat3-4 in
-GvpC-Cage-Latch-Design) binder segment leads, GFP segment trails. This
+(added 2026-09-17, for C-terminal latches such as Repeat3-4 of
+GvpC) binder segment leads, GFP segment trails. This
 affects both the live is_gfp/is_binder masks used for every task and the
 one-time per-partner reference complex (build_partner_reference()), which
 now derives which residues belong to the "binder"/"gfp" target from the
@@ -71,10 +70,9 @@ ASSUMPTIONS (please verify before trusting results):
    formula per case.
 2. GFP-binder hotspot residues (which residues in the gfp segment actually
    contact GFP) are NOT determined by this script -- they must be supplied
-   externally via --partner1_hotspots/--partner2_hotspots. See the
-   accompanying note's "Known open points".
+   externally via --partner1_hotspots/--partner2_hotspots.
 3. Test 4's known AF2/AF3 difficulty with multiple simultaneous competing
-   binding events (see Blocking-Peptide-Latch-Design.md) is NOT mitigated
+   binding events is NOT mitigated
    inside this script -- run it multiple times with different --seed values
    and compare, rather than trusting a single Test-4 prediction.
 
@@ -125,8 +123,7 @@ FILTER_PROFILES = {
     # Deliberately weak/generic -- direction of "success" for partner
     # metrics depends on the test (Test 2 wants low contact, Test 3/4 want
     # high contact), so no partner-metric thresholds are baked in here.
-    # Use --filter_json for real Test 2/3/4 thresholds (see examples in the
-    # accompanying note).
+    # Use --filter_json for real Test 2/3/4 thresholds.
     "permissive_generic": {
         "min_pLDDT": 0.55,
         "min_pTM": 0.30,
@@ -820,8 +817,8 @@ def build_partner_reference(
     # "tail", positions >= binder_start_residue) is the GFP segment vs. the
     # binder segment depends on redesign_terminus -- same field-meaning flip
     # as build_gfp_fusion_csv.py/score_gfp_fusion_monomer.py: "n" GFP=head,
-    # binder=tail (original); "c" binder=head, GFP=tail (e.g. Repeat3-4 in
-    # GvpC-Cage-Latch-Design). Split by chain_position (1-based positional
+    # binder=tail (original); "c" binder=head, GFP=tail (e.g. Repeat3-4 of
+    # GvpC). Split by chain_position (1-based positional
     # index), NOT r.residue_number/seqid.num -- first_task.input_pdb is
     # AF2's own predicted_pdb by default (--gate_pdb_source predicted),
     # which is not guaranteed to be 1-indexed (same root cause as the

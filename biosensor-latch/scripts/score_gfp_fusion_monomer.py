@@ -21,7 +21,7 @@ older CSVs without the column; or --redesign_terminus for --input_dir):
         - "blocking segment":  gfp_segment_end_residue < residue_number < binder_start_residue
         - "binder segment":    residue_number >= binder_start_residue
     redesign_terminus "c" (added 2026-09-17, for C-terminal latches such as
-    Repeat3-4 in GvpC-Cage-Latch-Design -- build_gfp_fusion_csv.py attaches
+    Repeat3-4 of GvpC -- build_gfp_fusion_csv.py attaches
     the GFP binder after the blocking peptide instead of before it, so the
     two boundary fields' meaning flips):
         - "binder segment":    residue_number <= gfp_segment_end_residue
@@ -250,7 +250,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
             "matches build_gfp_fusion_csv.py's redesign_terminus 'n'. 'c' "
             "the binder segment is N-terminal instead and the GFP segment is "
             "C-terminal (build_gfp_fusion_csv.py's redesign_terminus 'c', "
-            "for latches such as Repeat3-4 in GvpC-Cage-Latch-Design). Only "
+            "for latches such as Repeat3-4 of GvpC). Only "
             "used with --input_dir (applied to every file) -- with "
             "--sequence_csv this is read per row from the redesign_terminus "
             "column instead (falls back to 'n' if that column is "
@@ -860,8 +860,8 @@ def main() -> None:
             # own gfp_segment_end_residue/binder_start_residue field-meaning
             # flip): "n" GFP segment leads (head), binder segment trails
             # (tail) -- original behavior. "c" binder segment leads (head),
-            # GFP segment trails (tail) -- e.g. Repeat3-4 in
-            # GvpC-Cage-Latch-Design.
+            # GFP segment trails (tail) -- e.g. Repeat3-4 of
+            # GvpC.
             head_mask = residue_numbers <= task.gfp_segment_end_residue
             tail_mask = residue_numbers >= task.binder_start_residue
             if task.redesign_terminus == "n":

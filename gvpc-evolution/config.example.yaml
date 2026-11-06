@@ -2,7 +2,7 @@
 # GvpC evolution - configuration
 #
 # This is the configuration of the team's L1 round for Serratia GvpC (recovered
-# from the cluster, comments translated), with the paths made generic.
+# from the team's working copy, comments translated), with the paths made generic.
 # Keys marked "ADDED" were not in the original file: run_pipeline.sh of this
 # repository reads them, the original driver passed the same values on the
 # command line (the values are the script defaults of the original run).
@@ -139,7 +139,7 @@ gate:
   max_hotspot_rmsd: 10.0
   # 'ABCD in EVERY seed' let 0 of 10 designs through on 22.09. (29/50 seeds
   # hit ABCD). Hence relaxed. A SETTING, not a measurement - it directly determines
-  # the throughput numbers in plan §6 and belongs on the wiki with its reasoning.
+  # the throughput numbers and should be justified wherever the thresholds are reported.
   min_chain_seeds: 4        # out of 5
   require_all_chains: false
 

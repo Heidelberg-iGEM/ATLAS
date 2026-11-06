@@ -31,7 +31,7 @@
 # 7 spread-out hotspots, vs. 16-24 for the single-repeat example.
 
 autoinhibited_binder:
-  input: /home/hd/hd_hd/hd_ps334/workspace/foundry/input_pdbs/Ser_GvpC_full.pdb
+  input: /path/to/foundry/input_pdbs/Ser_GvpC_full.pdb
 
   contig: 48-128,A1-164
 

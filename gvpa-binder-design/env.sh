@@ -3,7 +3,7 @@
 #
 #   source env.sh
 #
-# The defaults come from drylab.env, which install.sh writes at the repository
+# The defaults come from atlas.env, which install.sh writes at the repository
 # root. Override any variable by exporting it before sourcing this file.
 #
 #   FOUNDRY_ENV      environment of the driver scripts, rfd3 and MPNN
@@ -16,16 +16,16 @@
 #   RUN_ROOT         output location (default: ./runs)
 #   CAMPAIGN_CONFIG  alternative campaign config (default: configs/gvpa_serratia.yaml)
 
-# Resolve symlinks (work/gvpa/env.sh points here) to find drylab.env at the repository root.
+# Resolve symlinks (work/gvpa/env.sh points here) to find atlas.env at the repository root.
 _src="${BASH_SOURCE[0]}"
 while [ -L "$_src" ]; do _src="$(readlink "$_src")"; done
 _repo="$(cd "$(dirname "$_src")/.." && pwd -P)"
-if [ -f "$_repo/drylab.env" ]; then
-    # Variables that are already exported win over drylab.env.
+if [ -f "$_repo/atlas.env" ]; then
+    # Variables that are already exported win over atlas.env.
     while IFS='=' read -r _k _v; do
         case "$_k" in ''|'#'*) continue ;; esac
         [ -n "${!_k:-}" ] || export "$_k=$(eval echo "$_v")"
-    done < "$_repo/drylab.env"
+    done < "$_repo/atlas.env"
 fi
 
 : "${FOUNDRY_ENV:=$HOME/.conda/envs/foundry}"
