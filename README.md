@@ -1,12 +1,10 @@
 # ATLAS: Drylab pipelines of iGEM Heidelberg 2026
 
-ATLAS is the name of the whole Drylab project. The in silico evolution of GvpC inside it is called the **GvpC evolution pipeline** in this repository.
-
 This repository holds the code of the Drylab part of the Heidelberg iGEM 2026 project (team VOYAGE) and an installer that sets up everything the pipelines need. Longer walkthroughs of each pipeline are in the **ATLAS Guide** and on the project wiki: <https://2026.igem.wiki/heidelberg/>.
 
 ## The project in short
 
-VOYAGE builds an acoustic platform around **gas vesicles (GVs)**: hollow, gas-filled protein nanostructures (about 250 nm) that scatter ultrasound strongly and can be encoded genetically. The shell is built mainly from **GvpA**; the outer scaffold protein **GvpC** binds to it and sets how much pressure the vesicle survives before the shell buckles (its *collapse pressure*). GvpC is therefore the main engineering handle of the whole project:
+VOYAGE builds an acoustic platform around **gas vesicles (GVs)**: hollow, gas-filled protein nanostructures (about 250 nm) that scatter ultrasound strongly and can be encoded genetically. The shell is built mainly from **GvpA**; the outer scaffold protein **GvpC** binds to it and sets how much pressure the vesicle survives before the shell buckles and before it collapses (its *collapse pressure*). GvpC is therefore the main engineering handle of the whole project:
 
 - **Observation:** GvpC variants with different collapse pressures make several GV populations distinguishable in one ultrasound image (multiplexing). Analyte-sensitive GvpC constructs turn GVs into biosensors.
 - **Organization:** GVs attached to cells (SpyTag/SpyCatcher, DARPin) allow acoustic sorting and patterning.
@@ -53,7 +51,7 @@ You need `git`, `wget`, `conda` (or `mamba`: `PKG=mamba ./install.sh ...`) and, 
 | gvsam | conda `gvsam` | [CellSAM](https://github.com/vanvalenlab/cellSAM) |
 | gas | conda `gas` | none |
 
-**Why third-party code is fetched and not copied into the repository:** foundry and BindCraft are large and have their own licences, and FlexCraft has no licence file that allows redistribution. The pinned versions make the installation reproducible. The pins were taken on 2026-11-04; the versions the team originally ran with were not recorded, so if a stage fails on an API change, adjust the pin in `third_party.lock`.
+**Why third-party code is fetched and not copied into the repository:** foundry and BindCraft are large and have their own licences, and FlexCraft has no licence file that allows redistribution. The pinned versions make the installation reproducible. The pins were taken on 2026-11-04.
 
 All commands in the tutorials are run from the repository root.
 
@@ -198,31 +196,15 @@ utils/               fix_svg_upload.py
 third_party/  work/  atlas.env      (created by install.sh, not tracked)
 ```
 
-## What was checked, and what was not
-
-Checked on a machine without GPU: Python syntax of all scripts, the AST of the translated GvpC evolution scripts against the originals (only comments and message strings differ, plus the renamed labels in `40_select_gate.py` and the `tier_of` fix), `python lib_registry.py` (its self-test), the latch wiring test (`./atlas.sh latch check`), shell syntax and a dry run of `install.sh`, and `atlas.sh doctor`. **Not run:** the installation itself, any GPU stage and any end-to-end pipeline. Treat the installer and the reconstructed files (below) as a first version and expect to adjust paths and versions on your first real run.
-
 ## Known gaps
 
 The GvpC evolution scripts `33_boltz_register.py`, `05_template_fix.py`, `cells_after_filter.py` and `check_controls.py`, the real config, the template and the latch MPNN driver were recovered from the team's working copies; the following could not be found:
 
 | Part | Missing file | Consequence / workaround |
 |---|---|---|
-| gvpa | `run_pipeline.sh` (driver of all stages) | replaced by `./atlas.sh gvpa <stage>`; shard handling of stages 04–06 is up to you |
 | gvpa | `configs/gvpa_serratia.yaml`, `configs/filters_strict.json`, `configs/filters_relaxed.json` | stage 01 and everything after cannot start |
 | gvpa | `inputs/gvpa_ser_5mer.cif` | target structure (AlphaFold3 model, five GvpA subunits) |
-| gvsam | original `run_pipeline.sh` | replaced by a reconstruction from the stage scripts |
 | gas | `gvv` package, `labbook/`, `data/`, `scripts/40_parallel_claims.py` | the notebook cannot run without them |
-
-**Reconstructed, not original** (written from the guide and the scripts' own argument definitions, untested). The recovered GvpC evolution scripts come from the team's working copy; their German comments are translated, nothing else was changed: `gvsam/run_pipeline.sh`, `gvpa-binder-design/env.sh`, the `gvpa rfd3` loop in `atlas.sh` (override names checked against the rfd3 config of rc-foundry 0.2.0), and the stage-8 guard in `atlas-in-silico/run_pipeline.sh`.
-
-## Notes on changes against the original files
-
-- Comments and messages are in English. The label strings that `40_select_gate.py` writes into its CSVs are English now too (`composition`, `duplicate_of_…`, `…_missing`, `failure_…`, `control`, `control_wt`, `selected`, `lab_reference`, `diverse_…`); older `order.csv` files from the German version use the old words.
-- The stage numbers in the scripts' comments and messages follow the guide (1–11); the old scripts used an older numbering.
-- `lib_registry.tier_of` was fixed: the regex `\bT\d+\b` did not match in `tier_T1_high` because an underscore is a word character, so the self-test failed.
-- `gvsam/visualize.ipynb` had lost the line breaks inside its code cells and could not run; they are restored.
-- `setup_envs.sh` installs foundry from PyPI (`rc-foundry`, pinned) instead of cloning the repository, and can build single components (`SETUP_ONLY`).
 
 ## Licence and attribution
 

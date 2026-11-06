@@ -17,7 +17,7 @@
 #                         Flip to "A1-164,48-128" for a C-terminal latch
 #                         (--redesign_terminus c --fixed_end_sequence "<motif end>").
 #                         I inferred the flip from the contig convention rather than
-#                         from a logged c-terminal run -- bitte gegenchecken.
+#                         from a logged c-terminal run -- please double-check.
 #   select_fixed_atoms    ALL = hold the whole motif rigid (sequence AND coordinates).
 #   select_hotspots       surface residues the generated latch should cover. These
 #                         drive the design: ~2 per repeat worked here (7 total across

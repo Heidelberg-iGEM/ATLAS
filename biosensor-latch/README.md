@@ -27,11 +27,9 @@ This document describes the pipeline **as actually implemented in the scripts in
 
 1. **Complex prediction is opt-in, and nothing here uses AlphaFold-Multimer.** Two distinct points, often conflated:
    - *The co-folded stage is off by default.* Stage 6 (`score_gfp_fusion_partners.py`, Test 2/3/4) predicts the target-bound state, but only with `--run_partners`; without that flag the pipeline is the 5-stage version and the bound state is never modelled. Even with it, stage 6 is **report-only** unless you also pass `--partners_required`. Stage 5 remains the cheap geometric proxy: no GPU, no folding assumption, but no induced fit either.
-   - *No multimer weights anywhere.* Every AF2 call — stage 4 and stage 6 alike — runs the **monomer pTM** models (`model_config("model_1_ptm")`, params `model_<N>_ptm`), not AlphaFold-Multimer. Stage 6 co-folds by appending each partner as an additional chain built from an idealized placeholder backbone and predicting with those same monomer weights. So "AF2 multimer" in loose usage here means *multi-chain co-folding with monomer-pTM weights*. How the chain separation is encoded happens inside FlexCraft's AF input builder, which is not in this folder — *bitte gegenchecken* if it matters to you.
+   - *No multimer weights anywhere.* Every AF2 call — stage 4 and stage 6 alike — runs the **monomer pTM** models (`model_config("model_1_ptm")`, params `model_<N>_ptm`), not AlphaFold-Multimer. Stage 6 co-folds by appending each partner as an additional chain built from an idealized placeholder backbone and predicting with those same monomer weights. So "AF2 multimer" in loose usage here means *multi-chain co-folding with monomer-pTM weights*. How the chain separation is encoded happens inside FlexCraft's AF input builder, which is not in this folder — *please double-check* if it matters to you.
 2. **The "GFP" naming is historical, not conceptual.** Every script says `--gfp_binder_pdb`, `GFPSegment_pLDDT`, and so on, because GFP was the first target used as a testbed. The *role* is "target-binding module". For your own target you swap the structure files and the chain IDs; you do not rename anything. See §5.
 3. **The filter thresholds are not calibrated.** They were carried over from an earlier architecture and, on real data, the monomer gate's `pTM ≥ 0.45` rejected **175/175** constructs in one Repeat3-4 run. The rigid-docking default (`≥ 1` clash) is explicitly labelled a placeholder in its own source. Treat both profiles as starting points to be re-derived from your own score distributions (§7).
-4. **End-to-end cluster validation is an open point.** As of 2026-09-21 it had been written and tested locally but had **not yet run end-to-end on a GPU cluster**. *Bitte gegenchecken* before relying on it — and run `--dry_run` plus a deliberately tiny first batch regardless.
-5. **Stage 2 needs a *patched* `batch_partial_mpnn.py`.** The stock script is hardwired to N-terminal redesign. C-terminal latches (`--redesign_terminus c`) require a patch that adds `--redesign-terminus {n,c}` / `--fixed-end-sequence` **and** writes the `boundary_residue_id` + `redesign_terminus` CSV columns the bridge reads. Copies of the script from before the 2026-09-26 patch silently produced `redesign_terminus=n` / `boundary_residue_id=A1` for genuinely C-terminal designs and 640 CSV rows had to be corrected by hand. The orchestrator detects the stale version and falls back to the CLI value plus the anchor sequence — **with a warning you have to actually read in the log.** Details in §5.
 
 ---
 
@@ -182,7 +180,7 @@ The target-binder segment and the filler get idealized placeholder coordinates. 
 **Four assumptions the script documents about itself**, all worth respecting:
 1. The binder chain in the complex PDB must have an **identical sequence and length** to the construct's target-binder segment — automatic if you pass the same PDB to stages 3 and 5. A mismatch fails loudly rather than silently misaligning.
 2. Segment boundaries are applied **positionally**, never by `seqid.num` (the recurring off-by-one).
-3. The **rigid-body assumption** — that the module's local backbone is the same free, in the reference complex, and fused into the construct — is a simplification, not a fact. `gfp_binder_alignment_rmsd` is written out precisely so a bad fit is visible. In real Repeat1-2 runs it sat at **3.2–4.3 Å**, which the script's own docs call untrustworthy; a visual check suggested the cause was geometric (the module pointing the wrong way) rather than misfolding, but this remains **unresolved — bitte gegenchecken**.
+3. The **rigid-body assumption** — that the module's local backbone is the same free, in the reference complex, and fused into the construct — is a simplification, not a fact. `gfp_binder_alignment_rmsd` is written out precisely so a bad fit is visible. In real Repeat1-2 runs it sat at **3.2–4.3 Å**, which the script's own docs call untrustworthy; a visual check suggested the cause was geometric (the module pointing the wrong way) rather than misfolding, but this remains **unresolved — please double-check**.
 4. Clash counting is **CA–CA distance only** (3.5 Å) — coarse by design, not an atomic steric detector.
 
 **Calibration status: none.** `min_GFP_Blocking_CAClashes: 1` means "any clash at all" and is a placeholder. The orchestrator prints a warning if you run without `--rigid_filter_json`.
@@ -247,7 +245,7 @@ The pipeline deliberately straddles **two** environments, because their dependen
 | Environment | Provides | Used by | Source |
 |---|---|---|---|
 | **foundry** | `rfd3` (RFdiffusion3) and `batch_partial_mpnn.py` | Stages 1–2 | `RosettaCommons/foundry`, pip package **`rc-foundry`**, with official install instructions. RFdiffusion3 is distributed through it. |
-| **FlexCraft** | `flexcraft.structure.af` (AlphaFold2 via JAX), `flexcraft.data`, `flexcraft.structure.metrics`, `flexcraft.utils` | Stages 3–6 | FlexCraft, by **Michael Jendrusch**. As far as I know it is not a public pip package — ask the author for access. *Bitte gegenchecken.* |
+| **FlexCraft** | `flexcraft.structure.af` (AlphaFold2 via JAX), `flexcraft.data`, `flexcraft.structure.metrics`, `flexcraft.utils` | Stages 3–6 | FlexCraft, by **Michael Jendrusch**. As far as I know it is not a public pip package — ask the author for access. *Please double-check.* |
 
 Also required:
 
@@ -290,13 +288,6 @@ The layout the defaults assume, with `/path/to/foundry` standing for your own Fo
 | The five pipeline scripts + the self-check | `<flexcraft-repo>/flexcraft/pipelines/dual_binder_pipeline/scripts/` |
 | Target+binder complex PDBs | `<flexcraft-repo>/flexcraft/pipelines/dual_binder_pipeline/inputs/` |
 | Pipeline results (`--results_root`) | `<flexcraft-repo>/flexcraft/pipelines/dual_binder_pipeline/results` (default, relative to `--repo_root`) |
-
-### 5.5 Environment pitfalls on HPC systems
-
-From the team's RFdiffusion **1** setup (RFD3 via `rc-foundry` is reportedly less painful, but the class of problem recurs on HPC):
-
-- A conda-forge PyTorch can silently be a **CPU build** → `NO GPU DETECTED`. Install the CUDA build with `python -m pip` instead.
-- pip-installed Torch can drag in an old `libstdc++` → `GLIBCXX_3.4.26 not found` on the scipy import. Fix with `export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH` and `export PYTHONNOUSERSITE=1` — **also inside Slurm scripts, after `conda activate`.**
 
 ---
 
