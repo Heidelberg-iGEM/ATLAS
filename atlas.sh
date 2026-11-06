@@ -216,7 +216,7 @@ cmd_gvsam() {
         help|*) cat <<EOF
 gvsam commands (run in $d):
   run [FROM]         ./run_pipeline.sh [FROM]   split/augment, train, evaluate, gallery
-  stage SCRIPT ARGS  one script, e.g. 01_train_cellfinder.py
+  stage SCRIPT ARGS  one script, e.g. 01_train_cellfinder.py, or predict.py IMAGES --outdir DIR (shipped weights)
 Put images in $GVSAM_PROJECT/01_raw and masks in $GVSAM_PROJECT/02_masks_gv first.
 EOF
             ;;

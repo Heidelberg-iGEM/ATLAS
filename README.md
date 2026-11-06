@@ -33,6 +33,8 @@ cd ATLAS
 ./atlas.sh help
 ```
 
+The GVSAM weights (about 1.6 GB) are stored with [Git LFS](https://git-lfs.com): run `git lfs install` once before cloning, or `git lfs pull` afterwards.
+
 You need `git`, `wget`, `conda` (or `mamba`: `PKG=mamba ./install.sh ...`) and, for the structure-prediction stages, a CUDA-capable NVIDIA GPU. Plan for several hours and about 20 GB per GPU part. PyRosetta needs a licence (free for academic use, see <https://www.pyrosetta.org/downloads>).
 
 ### What `install.sh` does
@@ -146,6 +148,17 @@ Generates a helical latch with RFdiffusion3, designs its sequence, fuses it with
 
 ## Tutorial: gvsam (gas vesicle cluster detection)
 
+**Segment new images with the trained model.** The fine-tuned weights ship with the repository in [`gvsam/weights/`](gvsam/weights): `decoder.pt` is the complete fine-tuned CellSAM (detector plus mask decoder), `cellfinder.pt` is its detector head alone, the file stage 3 writes. Only the base CellSAM checkpoint is downloaded by `install.sh`.
+
+```bash
+./install.sh gvsam
+./atlas.sh gvsam stage predict.py /abs/path/to/images --outdir /abs/path/to/preds
+```
+
+This writes `<image>_mask.tif` per image (background 0, one integer id per cluster). `--bbox_threshold` (default 0.4) sets the detector confidence; lower finds more clusters. Use absolute paths, because `atlas.sh` runs the script from `work/gvsam/00_pipeline`. The released mask decoder is weak (pixel F1 0.04 on our 10 test images); the CellFinder detector is the useful part (F1 0.19, base CellSAM 0.0007), so check the output before relying on the masks.
+
+**Train your own.**
+
 ```bash
 ./install.sh gvsam
 # images:  work/gvsam/01_raw/            (.tif; change data.image_ext for other formats)
@@ -190,7 +203,8 @@ gvpc-evolution/      stage scripts 05-60 (incl. 33_boltz_register.py), helpers (
                      inputs/ (template, GvpA target MSA)
 gvpa-binder-design/  scripts/ (14 stage scripts), env.sh
 biosensor-latch/     scripts/, filters/, inputs/ (+ pdbs/ motif PDBs), foundry/batch_partial_mpnn.py, README.md
-gvsam/               01-04 scripts, augment.py, lib_*.py, run_pipeline.sh, setup_env.sh, config.yaml, visualize.ipynb
+gvsam/               01-04 scripts, predict.py, augment.py, lib_*.py, run_pipeline.sh, setup_env.sh, config.yaml,
+                     visualize.ipynb, weights/ (fine-tuned cellfinder.pt and decoder.pt, Git LFS)
 gas/                 gas-walkthrough.ipynb
 utils/               fix_svg_upload.py
 third_party/  work/  atlas.env      (created by install.sh, not tracked)
