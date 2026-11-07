@@ -115,9 +115,8 @@ gvpa commands (run in $pkg after sourcing env.sh):
   09  null make ... ; af2 --mode full ... ; null report --null ...
   extra: boltz-check --binder-seq ... --template ... --pocket-residues ...
 Every command passes its arguments on to the script (ATLAS Guide, chapter "Pipeline
-Stages", or add --help). It needs configs/gvpa_serratia.yaml, configs/filters_*.json and
-inputs/gvpa_ser_5mer.cif in $pkg; they are not part of this repository yet (README,
-"Known gaps").
+Stages", or add --help). It reads configs/gvpa_serratia.yaml, configs/filters_*.json and
+inputs/gvpa_ser_5mer.cif in $pkg.
 EOF
             return ;;
     esac
@@ -272,9 +271,9 @@ cmd_doctor() {
         chk "BindCraft env"         -x "$BINDCRAFT_ENV/bin/python"
         chk "DAlphaBall.gcc"        -f "$BINDCRAFT_DIR/functions/DAlphaBall.gcc"
         chk "boltz"                 -x "$BOLTZ_BIN"
-        chk "campaign config (repository gap)" -f "$GVPA_PACKAGE/configs/gvpa_serratia.yaml"
-        chk "filters_strict.json (repository gap)" -f "$GVPA_PACKAGE/configs/filters_strict.json"
-        chk "target gvpa_ser_5mer.cif (repository gap)" -f "$GVPA_PACKAGE/inputs/gvpa_ser_5mer.cif"
+        chk "campaign config" -f "$GVPA_PACKAGE/configs/gvpa_serratia.yaml"
+        chk "filters_strict.json" -f "$GVPA_PACKAGE/configs/filters_strict.json"
+        chk "target gvpa_ser_5mer.cif" -f "$GVPA_PACKAGE/inputs/gvpa_ser_5mer.cif"
     fi
     if [ "$p" = all ] || [ "$p" = latch ]; then
         echo "latch"

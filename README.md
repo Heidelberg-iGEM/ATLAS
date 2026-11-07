@@ -96,8 +96,7 @@ Useful helpers: `./atlas.sh evolution py cells_after_filter.py --config config.y
 
 Nine stages, driven stage by stage with `./atlas.sh gvpa <command>`. Stages 01–03 and 08 run in the `foundry` environment, 04–06 in `BindCraft`, 07 in `boltz`; the commands pick the right interpreter. GPU needed for 01, 04, 05, 07 and the AF2 part of 09; stage 06 is CPU only and the slowest, so shard it over many cores.
 
-**Before you start** you need the campaign files that are not yet part of this repository (see *Known gaps*), in `gvpa-binder-design/`:
-`configs/gvpa_serratia.yaml`, `configs/filters_strict.json`, `configs/filters_relaxed.json` and `inputs/gvpa_ser_5mer.cif` (five GvpA subunits, residues 13–63). Then `cp configs/filters_strict.json configs/filters_bindcraft.json` (the ranker reads that name by default).
+**Campaign files** are in `gvpa-binder-design/`: `configs/gvpa_serratia.yaml`, `configs/filters_strict.json`, `configs/filters_relaxed.json` and `inputs/gvpa_ser_5mer.cif` (five GvpA subunits, residues 13–63). Before the first ranking run `cp configs/filters_strict.json configs/filters_bindcraft.json` (the ranker reads that name by default).
 
 ```bash
 ./install.sh gvpa
@@ -201,7 +200,7 @@ install.sh  atlas.sh  third_party.lock  LICENSE  NOTICE  README.md
 gvpc-evolution/      stage scripts 05-60 (incl. 33_boltz_register.py), helpers (cells_after_filter.py,
                      check_controls.py), lib_*.py, run_pipeline.sh, setup_envs.sh, config.example.yaml,
                      inputs/ (template, GvpA target MSA)
-gvpa-binder-design/  scripts/ (14 stage scripts), env.sh
+gvpa-binder-design/  scripts/ (14 stage scripts), env.sh, configs/ (campaign, filters), inputs/ (target)
 biosensor-latch/     scripts/, filters/, inputs/ (+ pdbs/ motif PDBs), foundry/batch_partial_mpnn.py, README.md
 gvsam/               01-04 scripts, predict.py, augment.py, lib_*.py, run_pipeline.sh, setup_env.sh, config.yaml,
                      visualize.ipynb, weights/ (fine-tuned cellfinder.pt and decoder.pt, Git LFS)
@@ -216,8 +215,6 @@ The GvpC evolution scripts `33_boltz_register.py`, `05_template_fix.py`, `cells_
 
 | Part | Missing file | Consequence / workaround |
 |---|---|---|
-| gvpa | `configs/gvpa_serratia.yaml`, `configs/filters_strict.json`, `configs/filters_relaxed.json` | stage 01 and everything after cannot start |
-| gvpa | `inputs/gvpa_ser_5mer.cif` | target structure (AlphaFold3 model, five GvpA subunits) |
 | gas | `gvv` package, `labbook/`, `data/`, `scripts/40_parallel_claims.py` | the notebook cannot run without them |
 
 ## Licence and attribution

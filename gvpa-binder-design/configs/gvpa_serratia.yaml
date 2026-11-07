@@ -1,0 +1,151 @@
+# Campaign config: de novo binders against the Serratia GvpA rib.
+#
+# Read by every script in scripts/ (common.load_config). Paths are relative to
+# gvpa-binder-design/ unless absolute; ${VAR} is expanded from the environment
+# (source env.sh first, or run through ./atlas.sh gvpa ...).
+
+campaign: gvpa_ser
+run_root: ${RUN_ROOT}
+
+# --------------------------------------------------------------------------
+# Target: five GvpA subunits (AlphaFold3 model, residues 13-63).
+# The three subunits in `design_chains` enter the design; A and E flank the
+# focus subunit B along the rib. RFD3 re-labels and re-numbers on output:
+# the binder becomes chain A, and input chains A, B, E become B, C, D
+# (each numbered from 1). `chain_map` records that mapping.
+# --------------------------------------------------------------------------
+target:
+  cif: inputs/gvpa_ser_5mer.cif
+  design_chains: [A, B, E]
+  chain_map: {A: B, B: C, E: D}   # input chain -> chain in RFD3 output / AF2 complex
+  focus_chain: B                   # input label of the subunit the "focal" arm addresses
+  binder_chain: A                  # label of the diffused chain in RFD3 output
+
+# --------------------------------------------------------------------------
+# Stage 01: RFdiffusion3
+# --------------------------------------------------------------------------
+rfd3:
+  dialect: 2
+  infer_ori_strategy: hotspots
+  n_backbones: 2000               # requested in total; the grid rounds to whole batches
+  diffusion_batch_size: 8
+  step_scale: 3.0                 # fallbacks when an axis is not in `sweep`
+  gamma_0: 0.2
+
+# Binder length bins (residues). Bins below 55 are scored with the tier-2 rules
+# of the filter file.
+length_bins: ["33-44", "45-54", "55-69", "70-89", "90-110"]
+
+# Sampler settings, crossed with arms and length bins (one cell per combination).
+# null = not conditioned (the key is left out of the RFD3 input).
+sweep:
+  step_scale: [2.0, 3.0]
+  gamma_0: [0.2, 0.6]
+  is_non_loopy: [null, true]
+
+# Epitope arms. `hotspots` maps an INPUT residue label to the side-chain atoms
+# RFD3 should treat as the contact. `weight` is the share of n_backbones.
+arms:
+  focal:                          # concentrated on the focus subunit
+    weight: 0.6
+    hotspots:
+      B53: CD,OE1,OE2
+      B57: NZ
+      B60: CD,OE1,OE2
+    triage:
+      min_chains_contacted: 1
+      min_focus_chain_contact_fraction: 0.6
+  span:                           # spread over the focus subunit and both neighbours
+    weight: 0.4
+    hotspots:
+      A60: CD,OE1,OE2
+      B57: NZ
+      E60: CD,OE1,OE2
+    triage:
+      min_chains_contacted: 2
+      min_focus_chain_contact_fraction: 0.0
+
+# --------------------------------------------------------------------------
+# Stage 02: geometry triage (CPU, before any sequence is designed)
+# --------------------------------------------------------------------------
+triage:
+  hotspot_contact_cutoff: 5.0     # A, closest heavy atom binder -> hotspot residue
+  min_hotspots_contacted: 2
+  min_chains_contacted: 1
+  min_interface_residues: 15      # target residues within 4 A of the binder
+  min_focus_chain_contact_fraction: 0.0
+  max_loop_fraction: 0.5          # CA-geometry estimate, a coarse sanity flag only
+  max_chainbreaks: 0              # interior CA-CA defects (terminal ones are trimmed)
+  max_clashes: 0
+  max_backbones_per_cell: 25
+
+# --------------------------------------------------------------------------
+# Stage 03: sequence design (SolubleMPNN)
+# --------------------------------------------------------------------------
+mpnn:
+  checkpoint: ${MPNN_CKPT}
+  n_sequences: 8
+  temperature: 0.1
+  omit: C
+
+# --------------------------------------------------------------------------
+# Stages 04-05: AlphaFold2 initial guess (BindCraft environment)
+# --------------------------------------------------------------------------
+af2:
+  params_dir: ${AF2_PARAMS_DIR}
+  use_multimer: false
+  num_recycles: 3
+  gate_models: [0]                # stage 04: one model, loose thresholds
+  full_models: [0, 1]             # stage 05: BindCraft's two validation models
+  interface_pae_contact_cutoff: 10.0
+  gate:                           # a sequence passes if ANY gate model meets all three
+    i_pae_max: 0.40               # colabdesign units (A / 31)
+    i_ptm_min: 0.45
+    plddt_min: 0.75
+
+# --------------------------------------------------------------------------
+# Stage 07: Boltz-2 (second opinion, never a gate)
+# --------------------------------------------------------------------------
+boltz:
+  enabled: true
+  max_designs: 200                # best accepted designs by composite
+  use_template: true
+  pocket_constraint: true
+  pocket_max_distance: 8.0
+  pocket_force: false
+  use_msa_server: false
+  recycling_steps: 3
+  diffusion_samples: 1
+
+# --------------------------------------------------------------------------
+# Stage 08: shortlist and order list
+# --------------------------------------------------------------------------
+diversity:
+  target_list_size: 48
+  max_per_backbone: 2
+  max_per_cluster: 3
+  contact_jaccard_cutoff: 0.5     # same epitope footprint above this overlap ...
+  approach_angle_cutoff: 40       # ... and approach direction within this angle (deg)
+  seq_identity_cutoff: 0.7        # drop sequences more similar than this to a pick
+
+order:                            # E. coli codon optimisation, untagged ORFs
+  gc_min: 0.40
+  gc_max: 0.60
+  max_homopolymer: 5
+  add_start_met: true
+  add_stop: true
+  avoid_sites:
+    BsaI: GGTCTC
+    BsaI_rc: GAGACC
+    BsmBI: CGTCTC
+    BsmBI_rc: GAGACG
+    NdeI: CATATG
+    XhoI: CTCGAG
+
+# --------------------------------------------------------------------------
+# Stage 09: null control (composition-matched scrambles)
+# --------------------------------------------------------------------------
+null_control:
+  seed: 42
+  n_per_accepted: 2
+  max_designs: 300

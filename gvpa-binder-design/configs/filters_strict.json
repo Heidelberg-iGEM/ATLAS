@@ -1,0 +1,280 @@
+{
+  "tiers": {
+    "tier1": {
+      "min_len": 55
+    },
+    "tier2": {
+      "min_len": 33
+    }
+  },
+  "criteria": {
+    "shared": [
+      {
+        "metric": "plddt",
+        "op": ">=",
+        "threshold": 0.8,
+        "per_model": true
+      },
+      {
+        "metric": "plddt",
+        "op": ">=",
+        "threshold": 0.8,
+        "per_model": false
+      },
+      {
+        "metric": "ptm",
+        "op": ">=",
+        "threshold": 0.55,
+        "per_model": true
+      },
+      {
+        "metric": "ptm",
+        "op": ">=",
+        "threshold": 0.55,
+        "per_model": false
+      },
+      {
+        "metric": "i_ptm",
+        "op": ">=",
+        "threshold": 0.5,
+        "per_model": true
+      },
+      {
+        "metric": "i_ptm",
+        "op": ">=",
+        "threshold": 0.5,
+        "per_model": false
+      },
+      {
+        "metric": "pae",
+        "op": "<=",
+        "threshold": 0.4,
+        "per_model": true
+      },
+      {
+        "metric": "pae",
+        "op": "<=",
+        "threshold": 0.4,
+        "per_model": false
+      },
+      {
+        "metric": "i_pae",
+        "op": "<=",
+        "threshold": 0.35,
+        "per_model": true
+      },
+      {
+        "metric": "i_pae",
+        "op": "<=",
+        "threshold": 0.35,
+        "per_model": false
+      },
+      {
+        "metric": "hotspot_rmsd",
+        "op": "<=",
+        "threshold": 6.0,
+        "per_model": true
+      },
+      {
+        "metric": "target_rmsd",
+        "op": "<=",
+        "threshold": 7.0,
+        "per_model": true
+      },
+      {
+        "metric": "binder_score",
+        "op": "<=",
+        "threshold": 0.0,
+        "per_model": true
+      },
+      {
+        "metric": "binder_score",
+        "op": "<=",
+        "threshold": 0.0,
+        "per_model": false
+      },
+      {
+        "metric": "surface_hydrophobicity",
+        "op": "<=",
+        "threshold": 0.37,
+        "per_model": true
+      },
+      {
+        "metric": "surface_hydrophobicity",
+        "op": "<=",
+        "threshold": 0.37,
+        "per_model": false
+      },
+      {
+        "metric": "interface_sc",
+        "op": ">=",
+        "threshold": 0.55,
+        "per_model": true
+      },
+      {
+        "metric": "interface_sc",
+        "op": ">=",
+        "threshold": 0.55,
+        "per_model": false
+      },
+      {
+        "metric": "interface_packstat",
+        "op": ">=",
+        "threshold": 0.0,
+        "per_model": true
+      },
+      {
+        "metric": "interface_packstat",
+        "op": ">=",
+        "threshold": 0.0,
+        "per_model": false
+      },
+      {
+        "metric": "interface_dG",
+        "op": "<=",
+        "threshold": 0.0,
+        "per_model": true
+      },
+      {
+        "metric": "interface_dG",
+        "op": "<=",
+        "threshold": 0.0,
+        "per_model": false
+      },
+      {
+        "metric": "interface_dSASA",
+        "op": ">=",
+        "threshold": 1.0,
+        "per_model": true
+      },
+      {
+        "metric": "interface_dSASA",
+        "op": ">=",
+        "threshold": 1.0,
+        "per_model": false
+      },
+      {
+        "metric": "interface_dG_SASA_ratio",
+        "op": "<=",
+        "threshold": 0.0,
+        "per_model": true
+      },
+      {
+        "metric": "interface_dG_SASA_ratio",
+        "op": "<=",
+        "threshold": 0.0,
+        "per_model": false
+      },
+      {
+        "metric": "interface_fraction",
+        "op": ">=",
+        "threshold": 25.0,
+        "per_model": true
+      },
+      {
+        "metric": "interface_fraction",
+        "op": ">=",
+        "threshold": 25.0,
+        "per_model": false
+      },
+      {
+        "metric": "interface_hydrophobicity",
+        "op": "<=",
+        "threshold": 37.0,
+        "per_model": true
+      },
+      {
+        "metric": "interface_hydrophobicity",
+        "op": "<=",
+        "threshold": 37.0,
+        "per_model": false
+      },
+      {
+        "metric": "interface_nres",
+        "op": ">=",
+        "threshold": 7,
+        "per_model": true
+      },
+      {
+        "metric": "interface_nres",
+        "op": ">=",
+        "threshold": 7,
+        "per_model": false
+      },
+      {
+        "metric": "interface_hbonds",
+        "op": ">=",
+        "threshold": 3,
+        "per_model": true
+      },
+      {
+        "metric": "interface_hbonds",
+        "op": ">=",
+        "threshold": 3,
+        "per_model": false
+      },
+      {
+        "metric": "interface_unsat_hbonds",
+        "op": "<=",
+        "threshold": 4,
+        "per_model": true
+      },
+      {
+        "metric": "interface_unsat_hbonds",
+        "op": "<=",
+        "threshold": 4,
+        "per_model": false
+      }
+    ],
+    "tier1_only": [
+      {
+        "metric": "binder_alone_plddt",
+        "op": ">=",
+        "threshold": 0.8,
+        "per_model": false
+      },
+      {
+        "metric": "binder_rmsd",
+        "op": "<=",
+        "threshold": 3.5,
+        "per_model": false
+      }
+    ],
+    "tier2_only": [
+      {
+        "metric": "plddt",
+        "op": ">=",
+        "threshold": 0.85,
+        "per_model": true
+      },
+      {
+        "metric": "plddt",
+        "op": ">=",
+        "threshold": 0.85,
+        "per_model": false
+      },
+      {
+        "metric": "binder_helix_sheet_pct",
+        "op": ">=",
+        "threshold": 70.0,
+        "per_model": false
+      }
+    ]
+  },
+  "extra": [
+    {
+      "metric": "binder_loop_pct",
+      "op": "<=",
+      "threshold": 40.0,
+      "per_model": false,
+      "enabled": false
+    },
+    {
+      "metric": "interface_unsat_pct",
+      "op": "<=",
+      "threshold": 25.0,
+      "per_model": false,
+      "enabled": false
+    }
+  ]
+}
