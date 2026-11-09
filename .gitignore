@@ -11,3 +11,6 @@ __pycache__/
 # runtime output of the GvpA package
 gvpa-binder-design/runs/
 gvpa-binder-design/logs/
+
+# runtime output of the PAS GUI
+pas-gui/data/

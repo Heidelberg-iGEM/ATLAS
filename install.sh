@@ -4,13 +4,14 @@
 #
 #   ./install.sh [--dry-run] [--cuda 12.4] [PART ...]
 #
-#   PART   all (default) | evolution | gvpa | latch | gvsam | gas
+#   PART   all (default) | evolution | gvpa | latch | gvsam | gas | pas
 #
 #   evolution  GvpC in silico evolution    envs: foundry (uv), evolution_boltz, BindCraft, evolution_rosetta
 #   gvpa   GvpA binder design              envs: foundry (uv), evolution_boltz, BindCraft
 #   latch  biosensor latch design          envs: foundry (uv), flexcraft (conda)
 #   gvsam  GV cluster detection            env:  gvsam (conda)
 #   gas    collapse-pressure analysis      env:  gas (conda)
+#   pas    pressurized absorbance spectroscopy GUI   env:  pas (conda)
 #
 # What it does
 #   - fetches third-party code at the versions pinned in third_party.lock into third_party/
@@ -19,7 +20,7 @@
 #   - downloads model weights
 #   - creates a project folder per part under work/ with the repository's scripts
 #     linked in and a ready-to-edit config
-#   - writes atlas.env, which atlas.sh reads to find every interpreter
+#   - links atlas.sh as ~/.local/bin/atlas and writes atlas.env, which it reads to find every interpreter
 #
 # It is idempotent: whatever exists is skipped, so it can be rerun after a failure.
 # --dry-run prints every command without executing it.
@@ -44,14 +45,14 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --dry-run) DRY=1 ;;
         --cuda) shift; CUDA="$1" ;;
-        -h|--help) sed -n 2,30p "$0"; exit 0 ;;
-        all|evolution|gvpa|latch|gvsam|gas) PARTS+=("$1") ;;
+        -h|--help) sed -n 2,31p "$0"; exit 0 ;;
+        all|evolution|gvpa|latch|gvsam|gas|pas) PARTS+=("$1") ;;
         *) echo "unknown argument: $1 (see --help)"; exit 1 ;;
     esac
     shift
 done
 [ ${#PARTS[@]} -gt 0 ] || PARTS=(all)
-[[ " ${PARTS[*]} " == *" all "* ]] && PARTS=(evolution gvpa latch gvsam gas)
+[[ " ${PARTS[*]} " == *" all "* ]] && PARTS=(evolution gvpa latch gvsam gas pas)
 want() { [[ " ${PARTS[*]} " == *" $1 "* ]]; }
 
 run() { echo "+ $*"; [ "$DRY" = 1 ] || "$@"; }
@@ -189,6 +190,16 @@ if want gas; then
     fi
 fi
 
+if want pas; then
+    say "PAS (conda env pas)"
+    if [ ! -x "$CONDA_BASE/envs/pas/bin/python" ]; then
+        run "$PKG" create -y -n pas python=3.11     # conda's Python ships Tk
+        run "$CONDA_BASE/envs/pas/bin/pip" install numpy scipy matplotlib
+    else
+        echo "conda env pas exists, skipped"
+    fi
+fi
+
 # --- atlas.env ----------------------------------------------------------------
 say "Writing $ENVFILE"
 if [ "$DRY" = 0 ]; then
@@ -216,15 +227,23 @@ FOUNDRY_WORKSPACE=$TP/foundry
 GVSAM_PROJECT=$WORK/gvsam
 # gas
 GAS_ENV=$CONDA_BASE/envs/gas
+# pas
+PAS_ENV=$CONDA_BASE/envs/pas
 EOF
 else
     echo "(dry run: not written)"
 fi
 
+# --- atlas command -------------------------------------------------------------
+say "Command: ~/.local/bin/atlas"
+run mkdir -p "$HOME/.local/bin"
+run ln -sfn "$REPO/atlas.sh" "$HOME/.local/bin/atlas"
+case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) echo "note: add ~/.local/bin to your PATH to call 'atlas' from anywhere" ;; esac
+
 cat <<EOF
 
 Done. Next steps:
-  ./atlas.sh doctor              check that everything the selected parts need is in place
-  ./atlas.sh help                list the commands of every part
-  README.md                       tutorial for each part
+  atlas doctor              check that everything the selected parts need is in place
+  atlas help                list the commands of every part
+  README.md                 tutorial for each part
 EOF
